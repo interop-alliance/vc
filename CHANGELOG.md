@@ -1,6 +1,6 @@
 # @interop/vc ChangeLog
 
-## 11.0.1 -
+## 11.0.1 - 2026-06-02
 
 ### Changed
 - Type the `suite` parameter of `issue()` and `signPresentation()` as
