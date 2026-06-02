@@ -231,10 +231,53 @@ on this toolchain; same `src/` + `test/{node,browser}` layout).
     global CLAUDE.md.
   - Gate: `pnpm run test-node` green (120/120), `tsc -p tsconfig.dev.json
     --noEmit` clean, `pnpm run lint` + `pnpm run build` clean.
-- **B5 -- Playwright smoke (`test/browser/`).** issue->verify roundtrip. Gate:
-  `pnpm run test-browser` green.
-- **B6 -- cleanup + docs.** README, flip `CLAUDE.md` status bullets, CI,
-  CHANGELOG. Gate: full `pnpm test` green.
+- **B5 -- Playwright smoke (`test/browser/`). DONE.** Added the browser test
+  harness mirroring the `@interop/data-integrity-proof` reference: `test/index.html`
+  (empty-body dev page), `test/browser/roundtrip.entry.ts` (a `runRoundtrip()` that
+  generates a `did:key` Ed25519 issuer, issues a VC 2.0 with `Ed25519Signature2020`,
+  then verifies it -- mirrors the "should verify a vc" Node test), and
+  `test/browser/roundtrip.spec.ts` (Playwright drives Chromium, `page.evaluate`
+  imports the Vite-served entry URL and asserts `hasProof` + `verified`, and fails
+  on any `pageerror`). The entry reuses the Node `documentLoader.ts`/`mock-data.ts`
+  fixtures; bare `@interop/*` specifiers are rewritten by the Vite dev server when
+  it serves the entry module (which is why the spec imports the served URL rather
+  than importing packages directly in `page.evaluate`). No `vite.config.ts` alias
+  needed: unlike data-integrity-proof, this lib has no `node:crypto`/sha256 browser
+  swap of its own -- the crypto lives in the suite deps, which ship their own
+  browser variants. The absolute-URL dynamic import (`/test/browser/roundtrip.entry.ts`)
+  is not a tsc-resolvable module path; the reference repo lives with the resulting
+  `tsc` error, but to keep this project's `tsc -p tsconfig.dev.json --noEmit` gate
+  clean it carries a single `// @ts-expect-error`. Gate: `pnpm run test-browser`
+  green (1 passed), and node (120/120) + dev typecheck + lint + build all still clean.
+- **B6 -- cleanup + docs. DONE.** Repointed the README to `@interop/vc`
+  (title/badge, install via `pnpm`, Node 24+, ESM `import * as vc` instead of
+  the old `require(...)`, the Ed25519 suite/key imports to
+  `@interop/ed25519-signature` + `@interop/ed25519-verification-key`,
+  `@digitalbazaar/data-integrity` -> `@interop/data-integrity-proof`,
+  `@digitalcredentials/security-document-loader` ->
+  `@interop/security-document-loader`; kept the `@digitalbazaar/ecdsa-sd-2023-
+  cryptosuite` refs since there's no `@interop` fork; rewrote the Testing section
+  for Vitest/Playwright/`pnpm test`). Flipped `CLAUDE.md`'s "Current status"
+  bullets to "port complete" (pnpm / Vitest+Playwright / template ESLint+Prettier
+  / TypeScript). CHANGELOG: renamed the heading to `@interop/vc`, added Unreleased
+  "Changed" entries for the package rename, the TypeScript conversion, and the
+  toolchain adoption, plus a "Removed" entry for dropping
+  `ed25519-signature-2018-context`. CI: replaced the npm/mocha/karma `main.yml`
+  with the template `ci.yml` (pnpm, Node 24, lint+build+test-node+Playwright) and
+  added `publish.yml` (npm trusted publishing on GitHub release); removed the dead
+  DCC-org `issues-to-project.yml`. BACKGROUND.md left as-is (conceptual key/suite
+  primer inherited from upstream). Gate: full `pnpm test` green (lint clean,
+  120/120 node, 1/1 browser); `pnpm run build` + `tsc -p tsconfig.dev.json
+  --noEmit` clean.
+
+### Phase B complete
+
+All six sub-phases (B1-B6) are done. `@interop/vc` is TypeScript (`src/` ->
+`dist/` via `tsc`), on the isomorphic-lib-template toolchain (pnpm, Vitest,
+Playwright, Prettier, template ESLint), with deps repointed to `@interop/*`.
+The only open item is the upstream jsonld-signatures `date: Date | null` widening
+noted under "Upstream to-dos" (lets the test suite's `any`-typed suite holders
+become concrete suite classes); harmless at runtime.
 
 #### Upstream to-dos (other `@interop/*` repos)
 

@@ -1,4 +1,4 @@
-# @digitalcredentials/vc ChangeLog
+# @interop/vc ChangeLog
 
 ## Unreleased - TBD
 
@@ -18,6 +18,16 @@
   `@digitalbazaar/vc@7.3.0`.
 
 ### Changed
+- **Rename the package from `@digitalcredentials/vc` to `@interop/vc`.**
+- **Convert the library to TypeScript.** Source moved from `lib/*.js` to
+  `src/*.ts` (built to `dist/` with `tsc`); the public API now ships `.d.ts`
+  types. Domain types (`VerifiableCredential`, `VerifiablePresentation`, ...)
+  are sourced from `@interop/data-integrity-core`. The package is ESM-only.
+- **Adopt the isomorphic-lib-template toolchain.** Switched the package manager
+  to `pnpm` (lockfile `pnpm-lock.yaml`); replaced Mocha/Chai with Vitest
+  (`test/node/`) and Karma with Playwright (`test/browser/`); replaced the
+  Digital Bazaar ESLint config with the template ESLint + Prettier setup;
+  bumped `engines.node` to `>= 24`.
 - Repoint dependencies to `@interop/*` forks: `@digitalcredentials/jsonld` to
   `@interop/jsonld@^9.0.2`, and `@digitalcredentials/jsonld-signatures` to
   `@interop/jsonld-signatures@^11.6.1`. The `@interop/jsonld-signatures` fork
@@ -27,6 +37,11 @@
   `@interop/data-integrity-proof@^3.2.0`.)
 
 ### Removed
+- Drop the `ed25519-signature-2018-context` dependency. It was only ever used by
+  the test suite (never imported by the library), and the test suite no longer
+  exercises the Ed25519 2018 suite -- VCs are now issued/verified with
+  `Ed25519Signature2020` (Multikey keys from `@interop/ed25519-verification-key`)
+  and presentations with the eddsa-rdfc-2022 `DataIntegrityProof` suite.
 - Remove the legacy OBv3 BETA signature verification fallback
   (`_verifyOBv3LegacySignature`, `wrapWithLegacyLoader`, and
   `lib/legacyDocumentLoader.js`), along with the now-unused
