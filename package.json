@@ -37,7 +37,7 @@
     "@digitalcredentials/credentials-v2-context": "^1.0.0",
     "@interop/data-integrity-core": "^6.1.0",
     "@interop/jsonld": "^9.0.2",
-    "@interop/jsonld-signatures": "^11.6.2",
+    "@interop/jsonld-signatures": "^11.6.7",
     "credentials-context": "^2.0.0"
   },
   "devDependencies": {

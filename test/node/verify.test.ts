@@ -9,6 +9,7 @@ import { Ed25519Signature2020, eddsaRdfc2022 } from '@interop/ed25519-signature'
 import { Ed25519VerificationKey } from '@interop/ed25519-verification-key'
 import { driver as didKeyDriver } from '@interop/did-method-key'
 import { DataIntegrityProof } from '@interop/data-integrity-proof'
+import type { LinkedDataProof } from '@interop/jsonld-signatures'
 import * as vc from '../../src/index.js'
 import { documentLoader, remoteDocuments } from './documentLoader.js'
 import { createSkewedTimeStamp } from './helpers.js'
@@ -24,25 +25,20 @@ const {
 const didKey = didKeyDriver()
 didKey.use({ keyPairClass: Ed25519VerificationKey })
 
-// The suite holders below (and the local ECDSA suites) are typed `any` on
-// purpose. `vc.issue`/`verifyCredential`/`derive`/`signPresentation` type their
-// `suite` param as jsonld-signatures' `LinkedDataSignature`, whose `date` is
-// `Date | undefined`. `Ed25519Signature2020`/`DataIntegrityProof` widen that to
-// `Date | null` (passing `date: null` omits `created`), so `null` is not
-// assignable to `Date | undefined` and TS rejects the suite at every call site.
-// It is a .d.ts shape mismatch only -- harmless at runtime. The real fix is
-// upstream: widen `LinkedDataSignature.date` to `Date | null` in
-// `@interop/jsonld-signatures`, after
-// which these can be typed as the concrete suite classes.
+// The suite holders below are the concrete suite classes. They all extend
+// jsonld-signatures' `LinkedDataProof`, which is the `suite` param type across
+// `vc.issue`/`verifyCredential`/`derive`/`signPresentation`/`verify`. The key
+// holders (`assertionKey`, `ecdsaKeyPair`) stay `any` because the verification-
+// key and ecdsa-multikey packages they come from are untyped here.
 //
 // Shared Ed25519 2020 issuer suite, used for signing and verifying VCs. The
 // VC 2.0 context only defines proof terms such as `challenge` under the
 // `DataIntegrityProof` type scope, so presentations (which carry a `challenge`)
 // are signed with the modern eddsa-rdfc-2022 Multikey suite instead -- both
 // suites the maintainer wants exercised.
-let suite: any
+let suite: Ed25519Signature2020
 // eddsa-rdfc-2022 DataIntegrityProof suite over the same key, for VP signing.
-let vpSuite: any
+let vpSuite: DataIntegrityProof
 // did:key DID whose verification method controls the shared suites.
 let issuerDid: string
 let assertionKey: any
@@ -97,7 +93,7 @@ for (const [version, mockCredential] of versionedCredentials) {
       })
       it('should throw an error on missing verificationMethod', async () => {
         // a suite with no signer has no verificationMethod
-        const brokenSuite: any = new Ed25519Signature2020()
+        const brokenSuite = new Ed25519Signature2020()
         let error: any
         try {
           await vc.issue({
@@ -305,18 +301,18 @@ for (const [version, mockCredential] of versionedCredentials) {
         const proofId = `urn:uuid:${uuid()}`
         const mandatoryPointers =
           version === 1.0 ? ['/issuer', '/issuanceDate'] : ['/issuer']
-        const ecdsaSdSignSuite: any = new DataIntegrityProof({
+        const ecdsaSdSignSuite = new DataIntegrityProof({
           signer: ecdsaKeyPair.signer(),
           cryptosuite: createSignCryptosuite({ mandatoryPointers })
         })
         ecdsaSdSignSuite.proof = { id: proofId }
-        const ecdsaSdDeriveSuite: any = new DataIntegrityProof({
+        const ecdsaSdDeriveSuite = new DataIntegrityProof({
           cryptosuite: createDiscloseCryptosuite({
             proofId,
             selectivePointers: ['/credentialSubject']
           })
         })
-        const ecdsaSdVerifySuite: any = new DataIntegrityProof({
+        const ecdsaSdVerifySuite = new DataIntegrityProof({
           cryptosuite: createVerifyCryptosuite()
         })
 
@@ -516,18 +512,18 @@ for (const [version, mockCredential] of versionedCredentials) {
           const proofId = `urn:uuid:${uuid()}`
           const mandatoryPointers =
             version === 1.0 ? ['/issuer', '/issuanceDate'] : ['/issuer']
-          const ecdsaSdSignSuite: any = new DataIntegrityProof({
+          const ecdsaSdSignSuite = new DataIntegrityProof({
             signer: ecdsaKeyPair.signer(),
             cryptosuite: createSignCryptosuite({ mandatoryPointers })
           })
           ecdsaSdSignSuite.proof = { id: proofId }
-          const ecdsaSdDeriveSuite: any = new DataIntegrityProof({
+          const ecdsaSdDeriveSuite = new DataIntegrityProof({
             cryptosuite: createDiscloseCryptosuite({
               proofId,
               selectivePointers: ['/credentialSubject']
             })
           })
-          const ecdsaSdVerifySuite: any = new DataIntegrityProof({
+          const ecdsaSdVerifySuite = new DataIntegrityProof({
             cryptosuite: createVerifyCryptosuite()
           })
 
@@ -1151,7 +1147,7 @@ for (const [version, mockCredential] of versionedCredentials) {
  */
 async function generateCredential(makeCredential: () => any): Promise<{
   credential: any
-  suite: any
+  suite: LinkedDataProof
   methodFor: (options: { purpose: string }) => any
 }> {
   const credential = makeCredential()
@@ -1160,7 +1156,7 @@ async function generateCredential(makeCredential: () => any): Promise<{
   credential.id = `http://example.edu/credentials/${uuid()}`
 
   const assertionMethodKey = methodFor({ purpose: 'assertionMethod' })
-  const signSuite: any = new Ed25519Signature2020({
+  const signSuite = new Ed25519Signature2020({
     signer: assertionMethodKey.signer()
   })
   const signed = await vc.issue({
@@ -1194,7 +1190,7 @@ async function generatePresentation({
   version: number
 }): Promise<{
   presentation: any
-  suite: any
+  suite: LinkedDataProof | LinkedDataProof[]
   documentLoader: typeof documentLoader
 }> {
   const credentials: any[] = []
@@ -1221,7 +1217,7 @@ async function generatePresentation({
   // eddsa-rdfc-2022 Multikey suite (carries `challenge` under both VC contexts)
   const { methodFor } = await generateCredential(mockCredential)
   const authenticationKey = methodFor({ purpose: 'authentication' })
-  const presentationSuite: any = new DataIntegrityProof({
+  const presentationSuite = new DataIntegrityProof({
     signer: authenticationKey.signer(),
     cryptosuite: eddsaRdfc2022
   })
