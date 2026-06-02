@@ -893,6 +893,39 @@ for(const [version, mockCredential] of versionedCredentials) {
             `The current date time (${now.toISOString()}) is before the ` +
             `"issuanceDate" (${credential.issuanceDate}).`);
         });
+        it('should accept "expirationDate" in the past within "maxClockSkew"',
+          () => {
+            const credential = mockCredential();
+            credential.issuer = 'did:example:12345';
+            // expired 100 seconds ago, within the default 300s skew
+            credential.expirationDate =
+              new Date(Date.now() - 100 * 1000).toISOString();
+            let error;
+            try {
+              vc._checkCredential({credential, mode: 'verify'});
+            } catch(e) {
+              error = e;
+            }
+            should.not.exist(error,
+              'Should not throw when "expirationDate" is within ' +
+              '"maxClockSkew"');
+          });
+        it('should accept "issuanceDate" in the future within "maxClockSkew"',
+          () => {
+            const credential = mockCredential();
+            credential.issuer = 'did:example:12345';
+            // issued 100 seconds in the future, within the default 300s skew
+            credential.issuanceDate =
+              new Date(Date.now() + 100 * 1000).toISOString();
+            let error;
+            try {
+              vc._checkCredential({credential});
+            } catch(e) {
+              error = e;
+            }
+            should.not.exist(error,
+              'Should not throw when "issuanceDate" is within "maxClockSkew"');
+          });
       }
       if(version === 2.0) {
         it('should reject "validFrom" in the future', () => {
@@ -1022,6 +1055,57 @@ for(const [version, mockCredential] of versionedCredentials) {
             `"validFrom" (${credential.validFrom}).`
           );
         });
+        it('should accept "validUntil" in the past within "maxClockSkew"',
+          () => {
+            const credential = mockCredential();
+            credential.issuer = 'did:example:12345';
+            // validUntil 100 seconds in the past, within the default 300s skew
+            credential.validUntil =
+              new Date(Date.now() - 100 * 1000).toISOString();
+            let error;
+            try {
+              vc._checkCredential({credential});
+            } catch(e) {
+              error = e;
+            }
+            should.not.exist(error,
+              'Should not throw when "validUntil" is within "maxClockSkew"');
+          });
+        it('should reject "validUntil" in the past beyond "maxClockSkew"',
+          () => {
+            const credential = mockCredential();
+            credential.issuer = 'did:example:12345';
+            credential.validUntil =
+              new Date(Date.now() - 100 * 1000).toISOString();
+            const now = new Date();
+            let error;
+            try {
+              // tighten skew to 0 so the 100s-past "validUntil" is rejected
+              vc._checkCredential({credential, now, maxClockSkew: 0});
+            } catch(e) {
+              error = e;
+            }
+            should.exist(error,
+              'Should throw when "validUntil" is beyond "maxClockSkew"');
+            error.message.should.contain(
+              `"validUntil" (${credential.validUntil}).`);
+          });
+        it('should accept "validFrom" in the future within "maxClockSkew"',
+          () => {
+            const credential = mockCredential();
+            credential.issuer = 'did:example:12345';
+            // validFrom 100 seconds in the future, within the default 300s skew
+            credential.validFrom =
+              new Date(Date.now() + 100 * 1000).toISOString();
+            let error;
+            try {
+              vc._checkCredential({credential});
+            } catch(e) {
+              error = e;
+            }
+            should.not.exist(error,
+              'Should not throw when "validFrom" is within "maxClockSkew"');
+          });
       }
       it('should reject if "credentialSubject" is empty', () => {
         const credential = mockCredential();
