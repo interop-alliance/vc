@@ -5,9 +5,7 @@ import prettierConfig from 'eslint-config-prettier'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  // Legacy mocha test files (`.js`) are dead until the B4 Vitest rebuild
-  // replaces them with `.ts`; the TS toolchain does not lint them.
-  globalIgnores(['dist', '**/*.min.js', 'test/**/*.js']),
+  globalIgnores(['dist', '**/*.min.js']),
   {
     files: ['**/*.ts'],
     extends: [

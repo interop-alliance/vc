@@ -1,24 +1,9 @@
 # @interop/vc ChangeLog
 
-## Unreleased - TBD
-
-### Added
-- Add `includeCredentials` option to `verify()`: when verifying a presentation,
-  each entry in `credentialResults` includes its source `credential`. Ported
-  from `@digitalbazaar/vc@7.3.0`, but **defaults to `true`** (rather than `false`
-  as upstream) to preserve this fork's existing behavior of always attaching the
-  credential; pass `includeCredentials: false` to omit them.
-- Add test coverage confirming `credentialStatus` may be an array (already
-  supported by the `_checkCredential` validation, which validates every entry).
-- Add `maxClockSkew` parameter (default `300` seconds) to `issue()`, `verify()`,
-  `verifyCredential()`, and `createPresentation()`. Date-time checks
-  (`expirationDate`/`issuanceDate` for VC 1.0, `validFrom`/`validUntil` for
-  VC 2.0) now tolerate clock skew up to `maxClockSkew`, fixing spurious failures
-  in decentralized systems where clocks are not perfectly in sync. Ported from
-  `@digitalbazaar/vc@7.3.0`.
+## 11.0.0 - TBD
 
 ### Changed
-- **Rename the package from `@digitalcredentials/vc` to `@interop/vc`.**
+- **BREAKING**: Fork, rename the package from `@digitalcredentials/vc@10` to `@interop/vc@11`.
 - **Convert the library to TypeScript.** Source moved from `lib/*.js` to
   `src/*.ts` (built to `dist/` with `tsc`); the public API now ships `.d.ts`
   types. Domain types (`VerifiableCredential`, `VerifiablePresentation`, ...)
@@ -35,6 +20,21 @@
   `*-context` dependencies are unchanged. (Test dev dependency
   `@digitalbazaar/data-integrity` likewise repointed to
   `@interop/data-integrity-proof@^3.2.0`.)
+
+### Added
+- Add `includeCredentials` option to `verify()`: when verifying a presentation,
+  each entry in `credentialResults` includes its source `credential`. Ported
+  from `@digitalbazaar/vc@7.3.0`, but **defaults to `true`** (rather than `false`
+  as upstream) to preserve this fork's existing behavior of always attaching the
+  credential; pass `includeCredentials: false` to omit them.
+- Add test coverage confirming `credentialStatus` may be an array (already
+  supported by the `_checkCredential` validation, which validates every entry).
+- Add `maxClockSkew` parameter (default `300` seconds) to `issue()`, `verify()`,
+  `verifyCredential()`, and `createPresentation()`. Date-time checks
+  (`expirationDate`/`issuanceDate` for VC 1.0, `validFrom`/`validUntil` for
+  VC 2.0) now tolerate clock skew up to `maxClockSkew`, fixing spurious failures
+  in decentralized systems where clocks are not perfectly in sync. Ported from
+  `@digitalbazaar/vc@7.3.0`.
 
 ### Removed
 - Drop the `ed25519-signature-2018-context` dependency. It was only ever used by

@@ -1,6 +1,6 @@
 {
   "name": "@interop/vc",
-  "version": "10.0.2",
+  "version": "11.0.0",
   "description": "Verifiable Credentials JavaScript library.",
   "type": "module",
   "scripts": {
@@ -34,15 +34,15 @@
   "types": "dist/index.d.ts",
   "sideEffects": false,
   "dependencies": {
-    "@digitalcredentials/credentials-v2-context": "^0.0.1-beta.0",
+    "@digitalcredentials/credentials-v2-context": "^1.0.0",
     "@interop/data-integrity-core": "^6.1.0",
     "@interop/jsonld": "^9.0.2",
-    "@interop/jsonld-signatures": "^11.6.1",
+    "@interop/jsonld-signatures": "^11.6.2",
     "credentials-context": "^2.0.0"
   },
   "devDependencies": {
-    "@digitalbazaar/ecdsa-multikey": "^1.6.0",
-    "@digitalbazaar/ecdsa-sd-2023-cryptosuite": "^3.0.0",
+    "@digitalbazaar/ecdsa-multikey": "^1.8.0",
+    "@digitalbazaar/ecdsa-sd-2023-cryptosuite": "^3.4.1",
     "@eslint/js": "^10.0.1",
     "@interop/data-integrity-proof": "^3.2.0",
     "@interop/did-method-key": "^7.1.0",
@@ -51,7 +51,6 @@
     "@interop/security-document-loader": "^9.2.1",
     "@playwright/test": "^1.60.0",
     "@types/node": "^25.9.1",
-    "@types/uuid": "^9.0.0",
     "@vitest/coverage-v8": "^4.1.7",
     "eslint": "^10.4.1",
     "eslint-config-prettier": "^10.1.8",
@@ -82,9 +81,15 @@
     "node": ">=24.0"
   },
   "author": {
-    "name": "Interop Alliance",
+    "name": "Digital Bazaar and Interop Alliance",
     "url": "https://github.com/interop-alliance/"
   },
+  "contributors": [
+    "Dave Longley <dlongley@digitalbazaar.com>",
+    "David I. Lehn <dlehn@digitalbazaar.com>",
+    "James Chartrand <chartraj@mit.edu>",
+    "Dmitri Zagidulin <dz@interopalliance.org>"
+  ],
   "license": "BSD-3-Clause",
   "repository": {
     "type": "git",

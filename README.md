@@ -1,8 +1,9 @@
 # Verifiable Credentials JS Library _(@interop/vc)_
 
+[![Node.js CI](https://github.com/interop-alliance/vc/workflows/CI/badge.svg)](https://github.com/interop-alliance/vc/actions?query=workflow%3A%22CI%22)
 [![NPM Version](https://img.shields.io/npm/v/@interop/vc.svg)](https://npm.im/@interop/vc)
 
-> A Javascript library for issuing and verifying Verifiable Credentials.
+> A TypeScript/JS library for issuing and verifying Verifiable Credentials for Node.js, browsers, and React Native.
 
 ## Table of Contents
 
@@ -25,9 +26,9 @@ credentials, and so on.)
 ## Background
 
 (Forked from
-[`digitalcredentials/vc`](https://github.com/digitalcredentials/vc), which was
+[`@digitalcredentials/vc@10.0.0`](https://github.com/digitalcredentials/vc), which was
 in turn forked from
-[`digitalbazaar/vc` v1.0.0](https://github.com/digitalbazaar/vc-js) to provide
+[`@digitalbazaar/vc@1.0.0`](https://github.com/digitalbazaar/vc-js) to provide
 React Native compatibility.)
 
 This library is a TypeScript (Node.js and browser) implementation of the
