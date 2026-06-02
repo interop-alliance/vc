@@ -1,6 +1,6 @@
-# Verifiable Credentials JS Library _(@digitalcredentials/vc)_
+# Verifiable Credentials JS Library _(@interop/vc)_
 
-[![NPM Version](https://img.shields.io/npm/v/@digitalcredentials/vc.svg)](https://npm.im/@digitalcredentials/vc)
+[![NPM Version](https://img.shields.io/npm/v/@interop/vc.svg)](https://npm.im/@interop/vc)
 
 > A Javascript library for issuing and verifying Verifiable Credentials.
 
@@ -24,12 +24,16 @@ credentials, and so on.)
 
 ## Background
 
-(Forked from [`digitalbazaar/vc` v1.0.0](https://github.com/digitalbazaar/vc-js)
-to provide ReactNative compatibility.)
+(Forked from
+[`digitalcredentials/vc`](https://github.com/digitalcredentials/vc), which was
+in turn forked from
+[`digitalbazaar/vc` v1.0.0](https://github.com/digitalbazaar/vc-js) to provide
+React Native compatibility.)
 
-This library is a Javascript (Node.js and browser) implementation of the
-[Verifiable Credentials Data Model 1.0](https://w3c.github.io/vc-data-model/)
-specification (the JWT serialization is not currently supported).
+This library is a TypeScript (Node.js and browser) implementation of the
+[Verifiable Credentials Data Model](https://w3c.github.io/vc-data-model/)
+specification, supporting both VC Data Model 1.0 and 2.0 (the JWT serialization
+is not currently supported).
 
 It allows you to perform the following basic operations:
 
@@ -50,20 +54,20 @@ the following:
 
 ## Install
 
-- Browsers and Node.js 18+ are supported.
+- Browsers and Node.js 24+ are supported.
 
 To install from NPM:
 
 ```
-npm install @digitalcredentials/vc
+npm install @interop/vc
 ```
 
-To install locally (for development):
+To install locally (for development), using [pnpm](https://pnpm.io/):
 
 ```
-git clone https://github.com/digitalcredentials/vc.git
+git clone https://github.com/interop-alliance/vc.git
 cd vc
-npm install
+pnpm install
 ```
 
 ## Usage
@@ -74,16 +78,15 @@ For signing, when setting up a signature suite, you will need to pass in
 a key pair containing a private key.
 
 ```js
-import vc from '@digitalcredentials/vc';
+import * as vc from '@interop/vc';
 
 // Required to set up a suite instance with private key
-import {Ed25519VerificationKey2020} from
-  '@digitalcredentials/ed25519-verification-key-2020';
-import {Ed25519Signature2020} from '@digitalcredentials/ed25519-signature-2020';
+import {Ed25519VerificationKey} from '@interop/ed25519-verification-key';
+import {Ed25519Signature2020} from '@interop/ed25519-signature';
 
-const keyPair = await Ed25519VerificationKey2020.generate();
+const keyPair = await Ed25519VerificationKey.generate();
 
-const suite = new Ed25519Signature2020({key: keyPair});
+const suite = new Ed25519Signature2020({signer: keyPair.signer()});
 ```
 
 ### Issuing a Verifiable Credential
@@ -96,7 +99,7 @@ Pre-requisites:
   Document and Public Key
 
 ```js
-const vc = require('@digitalcredentials/vc');
+import * as vc from '@interop/vc';
 
 // Sample unsigned credential
 const credential = {
@@ -130,10 +133,10 @@ Pre-requisites:
   Document and Public Key
 
 ```js
-import * as vc from '@digitalcredentials/vc';
+import * as vc from '@interop/vc';
 import * as ecdsaSd2023Cryptosuite from
   '@digitalbazaar/ecdsa-sd-2023-cryptosuite';
-import {DataIntegrityProof} from '@digitalbazaar/data-integrity';
+import {DataIntegrityProof} from '@interop/data-integrity-proof';
 
 const ecdsaKeyPair = await EcdsaMultikey.generate({
   curve: 'P-256',
@@ -190,10 +193,10 @@ Pre-requisites:
 * If you're using a custom `@context`, make sure it's resolvable
 
 ```js
-import * as vc from '@digitalcredentials/vc';
+import * as vc from '@interop/vc';
 import * as ecdsaSd2023Cryptosuite from
   '@digitalbazaar/ecdsa-sd-2023-cryptosuite';
-import {DataIntegrityProof} from '@digitalbazaar/data-integrity';
+import {DataIntegrityProof} from '@interop/data-integrity-proof';
 
 const {
   createDiscloseCryptosuite,
@@ -340,8 +343,8 @@ Pre-requisites:
 // by requiring this first you ensure security
 // contexts are loaded from jsonld-signatures
 // and not an insecure source.
-import vc from '@digitalcredentials/vc';
-import { securityLoader } from '@digitalcredentials/security-document-loader';
+import * as vc from '@interop/vc';
+import { securityLoader } from '@interop/security-document-loader';
 
 const documentLoader = securityLoader().build();
 
@@ -427,8 +430,8 @@ To verify a verifiable presentation:
 ```js
 // challenge has been received from the requesting party - see 'challenge'
 // section below
-import vc from '@digitalcredentials/vc';
-import { securityLoader } from '@digitalcredentials/security-document-loader';
+import * as vc from '@interop/vc';
+import { securityLoader } from '@interop/security-document-loader';
 
 const documentLoader = securityLoader().build();
 
@@ -486,7 +489,7 @@ supports it, for example:
 ```js
 import * as ecdsaSd2023Cryptosuite from
   '@digitalbazaar/ecdsa-sd-2023-cryptosuite';
-import {DataIntegrityProof} from '@digitalbazaar/data-integrity';
+import {DataIntegrityProof} from '@interop/data-integrity-proof';
 
 const {
   createDiscloseCryptosuite,
@@ -507,16 +510,22 @@ To verify a verifiable credential with a custom `@context` field use a
 
 ## Testing
 
-To run Mocha tests:
+To run the [Vitest](https://vitest.dev/) Node tests:
 
 ```
-npm run test-node
+pnpm run test-node
 ```
 
-To run Karma (in-browser) tests:
+To run the [Playwright](https://playwright.dev/) (in-browser) tests:
 
 ```
-npm run test-karma
+pnpm run test-browser
+```
+
+To run the full suite (lint, Node, and browser tests):
+
+```
+pnpm test
 ```
 
 ## Contribute

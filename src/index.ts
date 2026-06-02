@@ -333,7 +333,9 @@ export async function verify(
   const { presentation } = options
   try {
     if (!presentation) {
-      throw new TypeError('A "presentation" property is required for verifying.')
+      throw new TypeError(
+        'A "presentation" property is required for verifying.'
+      )
     }
     return await _verifyPresentation(options)
   } catch (error) {
@@ -417,7 +419,8 @@ async function _verifyCredential(
   const documentLoader = options.documentLoader || defaultDocumentLoader
 
   const { controller } = options
-  const purpose = options.purpose || new CredentialIssuancePurpose({ controller })
+  const purpose =
+    options.purpose || new CredentialIssuancePurpose({ controller })
 
   let result: VerifyCredentialResult
   try {
@@ -579,11 +582,14 @@ export async function signPresentation(
 
   const documentLoader = options.documentLoader || defaultDocumentLoader
 
-  return (await jsigs.sign(presentation as object, {
-    ...options,
-    purpose,
-    documentLoader
-  } as any)) as VerifiablePresentation
+  return (await jsigs.sign(
+    presentation as object,
+    {
+      ...options,
+      purpose,
+      documentLoader
+    } as any
+  )) as VerifiablePresentation
 }
 
 /**
@@ -600,8 +606,11 @@ export async function signPresentation(
 async function _verifyPresentation(
   options: VerifyPresentationOptions = {}
 ): Promise<VerifyPresentationResult> {
-  const { presentation, unsignedPresentation, includeCredentials = true } =
-    options
+  const {
+    presentation,
+    unsignedPresentation,
+    includeCredentials = true
+  } = options
 
   _checkPresentation(presentation as Presentation)
 
@@ -657,11 +666,14 @@ async function _verifyPresentation(
       challenge: challenge as string
     } as AuthenticationProofPurposeOptions)
 
-  const presentationResult = await jsigs.verify(presentation as object, {
-    ...options,
-    purpose,
-    documentLoader
-  } as any)
+  const presentationResult = await jsigs.verify(
+    presentation as object,
+    {
+      ...options,
+      purpose,
+      documentLoader
+    } as any
+  )
 
   return {
     presentationResult,
@@ -776,7 +788,9 @@ export function _checkCredential({
       if (mode === 'verify') {
         // check if `now` is after `expirationDate`
         const expirationDate = new Date(credential.expirationDate as string)
-        if (compareTime({ t1: nowDate, t2: expirationDate, maxClockSkew }) > 0) {
+        if (
+          compareTime({ t1: nowDate, t2: expirationDate, maxClockSkew }) > 0
+        ) {
           log.push({ id: 'expiration', valid: false })
           const error = new Error('Credential has expired.') as ErrorWithLog
           error.log = log

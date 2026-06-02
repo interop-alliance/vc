@@ -69,7 +69,10 @@ beforeAll(async () => {
     id: ecdsaKeyId,
     controller: ecdsaController
   })
-  remoteDocuments.set(ecdsaKeyId, await ecdsaKeyPair.export({ publicKey: true }))
+  remoteDocuments.set(
+    ecdsaKeyId,
+    await ecdsaKeyPair.export({ publicKey: true })
+  )
   remoteDocuments.set(ecdsaController, {
     '@context': 'https://www.w3.org/ns/did/v1',
     id: ecdsaController,
@@ -413,7 +416,9 @@ for (const [version, mockCredential] of versionedCredentials) {
         })
         it('fails to verify if a context has a null @id', async () => {
           const { credential, suite } = await generateCredential(mockCredential)
-          ;(credential['@context'] as unknown[]).push(invalidContexts.nullId.url)
+          ;(credential['@context'] as unknown[]).push(
+            invalidContexts.nullId.url
+          )
           const results = await vc.verifyCredential({
             suite,
             credential,
@@ -1094,7 +1099,9 @@ for (const [version, mockCredential] of versionedCredentials) {
           error = err
         }
         expect(error).toBeDefined()
-        expect(error.message).toContain('"credentialSubject" must make a claim.')
+        expect(error.message).toContain(
+          '"credentialSubject" must make a claim.'
+        )
       })
       it('should reject if a "credentialSubject" is empty', () => {
         const credential = mockCredential()
@@ -1110,7 +1117,9 @@ for (const [version, mockCredential] of versionedCredentials) {
           error = err
         }
         expect(error).toBeDefined()
-        expect(error.message).toContain('"credentialSubject" must make a claim.')
+        expect(error.message).toContain(
+          '"credentialSubject" must make a claim.'
+        )
       })
 
       it('should accept multiple credentialSubjects', () => {
