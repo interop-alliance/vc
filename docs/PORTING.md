@@ -14,7 +14,8 @@ Produce `@interop/vc` that:
 3. Keeps the `@digitalcredentials` (DCC) innovations (notably the fine-grained
    verification result `log`).
 4. Is converted to TypeScript.
-5. Repoints relevant dependencies to `@interop/*` forks.
+5. Uses the testing infrastructure and configs from /home/dmitri/code/Interop/isomorphic-lib-template
+6. Repoints relevant dependencies to `@interop/*` forks.
 
 ## Lineage
 
@@ -57,6 +58,59 @@ Test count grew 105 → 120 over the effort. `npm run lint` clean throughout.
 The four DB-gap items identified at the start are all closed. The outstanding DB
 `jsonld@9` / `jsonld-signatures@11.6` bumps are moot — those deps are being
 repointed to `@interop/*` forks anyway.
+
+### Dependency mapping (fork guidance from maintainer)
+
+Repoint these (consume the published npm versions; local checkouts under
+`/home/dmitri/code/Interop/` are read-only source references):
+
+| Current dep | Repoint to | Notes |
+|---|---|---|
+| `@digitalcredentials/jsonld@^9.0.0` | `@interop/jsonld@^9.0.2` | Tracks DB upstream closely. |
+| `@digitalcredentials/jsonld-signatures@^12.0.1` | `@interop/jsonld-signatures@^11.6.1` | Follows DB versioning (11.6), not DCC's 12.x. |
+| `@digitalbazaar/data-integrity@^2.0.0` (devDep) | `@interop/data-integrity-proof@^3.2.0` | Verify `DataIntegrityProof` API compatibility on swap. |
+
+Leave as-is (no `@interop` forks yet, or intentionally kept):
+
+- The `*-context` deps: `@digitalcredentials/credentials-v2-context`,
+  `credentials-context`, `ed25519-signature-2018-context`.
+- The `ecdsa-*` libraries (`@digitalbazaar/ecdsa-multikey`,
+  `@digitalbazaar/ecdsa-sd-2023-cryptosuite`) — no forks yet; hoped for future.
+
+Drop, migrating to the maintained Ed25519 suites:
+
+- **Ed25519 2018 support**: drop `@digitalbazaar/ed25519-signature-2018` and
+  `@digitalbazaar/ed25519-verification-key-2018`. Used in
+  `test/10-verify.spec.js`, `test/contexts/index.js`, `test/mocks/mock.data.js`.
+  **Migrate those tests to the `@interop/ed25519-signature@^7.0.0` Multikey and
+  2020 suites** (with keys from `@interop/ed25519-verification-key@^7.0.1`) --
+  these are the Ed25519 suites the maintainer most wants exercised. Since the
+  test suite is rebuilt in Phase B (Vitest), do this removal + migration
+  **there**, not as throwaway work against the mocha suite.
+
+Test-infra forks (for borrowing test harness from `@digitalbazaar/vc` during the
+Phase B test rebuild):
+
+- `@digitalbazaar/ed25519-signature-2020`/`-2018` -> `@interop/ed25519-signature`
+  (Multikey + 2020 suites)
+- `@digitalbazaar/ed25519-verification-key-*` -> `@interop/ed25519-verification-key`
+- `@digitalbazaar/did-io` -> `@interop/did-io`
+- `@digitalbazaar/did-method-key` -> `@interop/did-method-key`
+- `@digitalbazaar/did-method-web` -> `@interop/did-web-resolver`
+- `@digitalbazaar/security-document-loader` -> `@interop/security-document-loader`
+
+### Phasing
+
+- **Phase A (JS + mocha, low-risk): DONE.** Swapped the production deps
+  (`jsonld`, `jsonld-signatures`) and the `data-integrity` devDep, updating
+  imports in `lib/` and `test/`. `@interop/data-integrity-proof` exports
+  `DataIntegrityProof` compatibly. All 120 mocha tests pass; lint clean. The
+  2018 drop is deferred to Phase B.
+- **Phase B (TS + toolchain):** JSDoc-deepen the existing (shallow `{object}`)
+  types under `checkJs`, then mechanical `.js -> .ts`; adopt the
+  isomorphic-lib-template toolchain (pnpm/Vitest/Playwright/Prettier/tsc,
+  `src/` layout); rebuild test infra (borrowing from `@digitalbazaar/vc`, on the
+  `@interop` test-infra forks above); drop Ed25519 2018 during the rebuild.
 
 ## Lessons learned / non-obvious findings
 

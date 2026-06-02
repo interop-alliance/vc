@@ -14,13 +14,13 @@ import {assertionController} from './mocks/assertionController.js';
 import chai from 'chai';
 import {createSkewedTimeStamp} from './helpers.js';
 import {CredentialIssuancePurpose} from '../lib/CredentialIssuancePurpose.js';
-import {DataIntegrityProof} from '@digitalbazaar/data-integrity';
+import {DataIntegrityProof} from '@interop/data-integrity-proof';
 import {Ed25519Signature2018} from '@digitalbazaar/ed25519-signature-2018';
 import {
   Ed25519VerificationKey2018
 } from '@digitalbazaar/ed25519-verification-key-2018';
 import {invalidContexts} from './contexts/index.js';
-import jsigs from '@digitalcredentials/jsonld-signatures';
+import jsigs from '@interop/jsonld-signatures';
 import {v4 as uuid} from 'uuid';
 import {VeresOneDriver} from 'did-veres-one';
 import {versionedCredentials} from './mocks/credential.js';

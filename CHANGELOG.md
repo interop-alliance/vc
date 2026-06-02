@@ -17,6 +17,15 @@
   in decentralized systems where clocks are not perfectly in sync. Ported from
   `@digitalbazaar/vc@7.3.0`.
 
+### Changed
+- Repoint dependencies to `@interop/*` forks: `@digitalcredentials/jsonld` to
+  `@interop/jsonld@^9.0.2`, and `@digitalcredentials/jsonld-signatures` to
+  `@interop/jsonld-signatures@^11.6.1`. The `@interop/jsonld-signatures` fork
+  follows Digital Bazaar's `11.6.x` versioning rather than DCC's `12.x`. The
+  `*-context` dependencies are unchanged. (Test dev dependency
+  `@digitalbazaar/data-integrity` likewise repointed to
+  `@interop/data-integrity-proof@^3.2.0`.)
+
 ### Removed
 - Remove the legacy OBv3 BETA signature verification fallback
   (`_verifyOBv3LegacySignature`, `wrapWithLegacyLoader`, and

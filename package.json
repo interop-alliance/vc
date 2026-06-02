@@ -17,15 +17,15 @@
   ],
   "dependencies": {
     "@digitalcredentials/credentials-v2-context": "^0.0.1-beta.0",
-    "@digitalcredentials/jsonld": "^9.0.0",
-    "@digitalcredentials/jsonld-signatures": "^12.0.1",
+    "@interop/jsonld": "^9.0.2",
+    "@interop/jsonld-signatures": "^11.6.1",
     "credentials-context": "^2.0.0",
     "ed25519-signature-2018-context": "^1.1.0"
   },
   "devDependencies": {
     "@digitalbazaar/credentials-examples-context": "^1.0.0",
-    "@digitalbazaar/data-integrity": "^2.0.0",
     "@digitalbazaar/data-integrity-context": "^2.0.0",
+    "@interop/data-integrity-proof": "^3.2.0",
     "@digitalbazaar/ecdsa-multikey": "^1.6.0",
     "@digitalbazaar/ecdsa-sd-2023-cryptosuite": "^3.0.0",
     "@digitalbazaar/ed25519-signature-2018": "^4.0.0",
