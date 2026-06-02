@@ -1,6 +1,16 @@
 # @interop/vc ChangeLog
 
-## 11.0.0 - TBD
+## 11.0.1 -
+
+### Changed
+- Type the `suite` parameter of `issue()` and `signPresentation()` as
+  jsonld-signatures' `LinkedDataProof` (was `LinkedDataSignature`), matching the
+  other verify/derive APIs and the base class the modern Data Integrity suites
+  (`Ed25519Signature2020`, `DataIntegrityProof`) actually extend. Requires
+  `@interop/jsonld-signatures` >= the release that adds `verificationMethod?` to
+  `LinkedDataProof`.
+
+## 11.0.0 - 2026-06-02
 
 ### Changed
 - **BREAKING**: Fork, rename the package from `@digitalcredentials/vc@10` to `@interop/vc@11`.

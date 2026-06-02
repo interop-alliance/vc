@@ -3,10 +3,12 @@
  */
 import jsigs from '@interop/jsonld-signatures'
 import type {
-  DocumentLoader,
   LinkedDataProof,
   ProofValidateResult
 } from '@interop/jsonld-signatures'
+import type { IVerificationMethod } from '@interop/data-integrity-core/did'
+import type { IDocumentLoader } from '@interop/data-integrity-core/loader'
+import type { IProofDescription } from '@interop/data-integrity-core/vcdm'
 import jsonld from '@interop/jsonld'
 
 const {
@@ -56,7 +58,7 @@ export class CredentialIssuancePurpose extends AssertionProofPurpose {
    * @throws {Error} If proof's created timestamp is out of range.
    */
   async validate(
-    proof: object,
+    proof: IProofDescription,
     {
       document,
       suite,
@@ -65,8 +67,8 @@ export class CredentialIssuancePurpose extends AssertionProofPurpose {
     }: {
       document?: object
       suite?: LinkedDataProof
-      verificationMethod?: object
-      documentLoader?: DocumentLoader
+      verificationMethod?: IVerificationMethod
+      documentLoader?: IDocumentLoader
     }
   ): Promise<ProofValidateResult> {
     try {

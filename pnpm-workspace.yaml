@@ -7,3 +7,4 @@ minimumReleaseAgeExclude:
   - '@interop/ed25519-signature@7.0.0'
   - '@interop/ed25519-verification-key@7.0.1'
   - '@interop/security-document-loader@9.2.1'
+  - '@interop/jsonld-signatures@11.6.7'

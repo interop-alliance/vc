@@ -40,9 +40,7 @@
 import jsigs from '@interop/jsonld-signatures'
 import type {
   AuthenticationProofPurposeOptions,
-  DocumentLoader,
   LinkedDataProof,
-  LinkedDataSignature,
   ProofPurpose
 } from '@interop/jsonld-signatures'
 import jsonld from '@interop/jsonld'
@@ -51,6 +49,7 @@ import type {
   IVerifiableCredential,
   IVerifiablePresentation
 } from '@interop/data-integrity-core'
+import type { IDocumentLoader } from '@interop/data-integrity-core/loader'
 import {
   assertCredentialContext,
   assertDateString,
@@ -65,7 +64,7 @@ import { CredentialIssuancePurpose } from './CredentialIssuancePurpose.js'
 const { AssertionProofPurpose, AuthenticationProofPurpose } = jsigs.purposes
 
 export { dateRegex } from './helpers.js'
-export const defaultDocumentLoader: DocumentLoader =
+export const defaultDocumentLoader: IDocumentLoader =
   jsigs.extendContextLoader(_documentLoader)
 export { CredentialIssuancePurpose }
 
@@ -127,9 +126,9 @@ export type CheckStatus = (options: any) => Promise<any>
 /** Options for {@link issue}. */
 export interface IssueCredentialOptions {
   credential?: VerifiableCredential
-  suite?: LinkedDataSignature
+  suite?: LinkedDataProof
   purpose?: ProofPurpose
-  documentLoader?: DocumentLoader
+  documentLoader?: IDocumentLoader
   now?: string | Date
   maxClockSkew?: number
 }
@@ -138,7 +137,7 @@ export interface IssueCredentialOptions {
 export interface DeriveOptions {
   verifiableCredential?: VerifiableCredential
   suite?: LinkedDataProof
-  documentLoader?: DocumentLoader
+  documentLoader?: IDocumentLoader
 }
 
 /** Options for {@link verifyCredential}. */
@@ -147,7 +146,7 @@ export interface VerifyCredentialOptions {
   suite?: LinkedDataProof | LinkedDataProof[]
   purpose?: ProofPurpose
   controller?: object
-  documentLoader?: DocumentLoader
+  documentLoader?: IDocumentLoader
   checkStatus?: CheckStatus
   now?: string | Date
   maxClockSkew?: number
@@ -162,7 +161,7 @@ export interface VerifyPresentationOptions {
   challenge?: string
   controller?: object
   domain?: string
-  documentLoader?: DocumentLoader
+  documentLoader?: IDocumentLoader
   checkStatus?: CheckStatus
   now?: string | Date
   maxClockSkew?: number
@@ -183,11 +182,11 @@ export interface CreatePresentationOptions {
 /** Options for {@link signPresentation}. */
 export interface SignPresentationOptions {
   presentation?: Presentation
-  suite?: LinkedDataSignature
+  suite?: LinkedDataProof
   purpose?: ProofPurpose
   domain?: string
   challenge?: string
-  documentLoader?: DocumentLoader
+  documentLoader?: IDocumentLoader
 }
 
 /** Options for {@link _checkCredential}. */

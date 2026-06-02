@@ -275,23 +275,38 @@ on this toolchain; same `src/` + `test/{node,browser}` layout).
 All six sub-phases (B1-B6) are done. `@interop/vc` is TypeScript (`src/` ->
 `dist/` via `tsc`), on the isomorphic-lib-template toolchain (pnpm, Vitest,
 Playwright, Prettier, template ESLint), with deps repointed to `@interop/*`.
-The only open item is the upstream jsonld-signatures `date: Date | null` widening
-noted under "Upstream to-dos" (lets the test suite's `any`-typed suite holders
-become concrete suite classes); harmless at runtime.
+The former open item (concrete suite types in the test suite) is now resolved --
+see "Upstream to-dos" below.
 
 #### Upstream to-dos (other `@interop/*` repos)
 
-- **Widen `LinkedDataSignature.date` to `Date | null` in
-  `@interop/jsonld-signatures`.** Its `index.d.ts` types the suite `date` as
-  `Date | undefined`, but `@interop/data-integrity-proof`'s `DataIntegrityProof`
-  (and thus `Ed25519Signature2020` / the eddsa-rdfc-2022 suite) widens it to
-  `Date | null` -- passing `date: null` is the supported way to omit `created`
-  from a proof. Because `null` is not assignable to `Date | undefined`, every
-  `issue`/`verifyCredential`/`derive`/`signPresentation`/`verify` call that
-  receives a real suite fails to type-check, which is why the B4 test suite types
-  its suite holders as `any` (see `test/node/verify.test.ts` header comment).
-  It is a `.d.ts`-only mismatch (harmless at runtime). Once jsigs widens the
-  field, those `any`s can become the concrete suite classes.
+- **DONE -- typed suite holders concrete (jsigs `LinkedDataProof` +
+  `issue`/`signPresentation` retype).** The original plan here was to widen
+  `LinkedDataSignature.date` to `Date | null` in `@interop/jsonld-signatures`,
+  on the theory that the `date` mismatch was the only blocker. Investigation
+  showed that was necessary but **not sufficient**: the real suites
+  (`Ed25519Signature2020`, `DataIntegrityProof`, the ecdsa-sd-2023 suites) all
+  extend jsigs `LinkedDataProof`, *not* `LinkedDataSignature`, and after a
+  `date` fix the next blockers surfaced (`DataIntegrityProof.sign` /
+  `verifySignature` use `IProofDescription`/`IDocumentLoader` vs jsigs'
+  `object`/`DocumentLoader`, and it has no `getVerificationMethod`) --
+  `DataIntegrityProof` simply is not a `LinkedDataSignature`. The fix taken:
+  - `@interop/jsonld-signatures` (types only): added `verificationMethod?: string`
+    to the `LinkedDataProof` base class and widened `LinkedDataSignature.date`
+    (and the constructor option) to `Date | null`. Runtime unchanged.
+  - `@interop/vc`: retyped `IssueCredentialOptions.suite` and
+    `SignPresentationOptions.suite` from `LinkedDataSignature` to
+    `LinkedDataProof` (the base the modern suites actually extend; `issue()`
+    reads `suite.verificationMethod`, which is why `LinkedDataProof` needed that
+    field). The `test/node/verify.test.ts` suite holders are now the concrete
+    suite classes; only the key holders (`assertionKey`, `ecdsaKeyPair`) stay
+    `any` (untyped key packages).
+
+  Sequencing: `@interop/vc` consumes jsigs from the npm registry, so its type
+  changes only compile once the new `@interop/jsonld-signatures` is published and
+  pulled in (the `^11.6.2` range picks up the next patch/minor on
+  `pnpm install`). Verified locally against a mirrored copy of the jsigs change
+  in `node_modules`.
 
 #### Phase B decisions (from maintainer)
 
