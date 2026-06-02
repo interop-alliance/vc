@@ -689,6 +689,60 @@ for(const [version, mockCredential] of versionedCredentials) {
         result.verified.should.be.a('boolean');
         result.verified.should.be.true;
       });
+      it('includes each credential in credentialResults by default',
+        async () => {
+          const challenge = uuid();
+
+          const {presentation, suite, documentLoader} =
+            await _generatePresentation({challenge, mockCredential, version});
+
+          const result = await vc.verify({
+            challenge,
+            suite,
+            documentLoader,
+            presentation
+          });
+
+          if(result.error) {
+            const firstError = [].concat(result.error)[0];
+            throw firstError;
+          }
+          result.verified.should.be.true;
+          // `includeCredentials` defaults to true, so each result should
+          // carry its source credential
+          for(const credentialResult of result.credentialResults) {
+            should.exist(credentialResult.credential,
+              'Expected each credentialResult to include its "credential"');
+            credentialResult.credential.should.be.an('object');
+          }
+        });
+      it('omits credentials from credentialResults when includeCredentials ' +
+        'is false', async () => {
+        const challenge = uuid();
+
+        const {presentation, suite, documentLoader} =
+          await _generatePresentation({challenge, mockCredential, version});
+
+        const result = await vc.verify({
+          challenge,
+          suite,
+          documentLoader,
+          presentation,
+          includeCredentials: false
+        });
+
+        if(result.error) {
+          const firstError = [].concat(result.error)[0];
+          throw firstError;
+        }
+        result.verified.should.be.true;
+        for(const credentialResult of result.credentialResults) {
+          should.not.exist(credentialResult.credential,
+            'Expected credentialResult to omit "credential"');
+          // credentialId is still populated regardless of includeCredentials
+          should.exist(credentialResult.credentialId);
+        }
+      });
     });
 
     describe('test for multiple credentials', async () => {
@@ -840,6 +894,60 @@ for(const [version, mockCredential] of versionedCredentials) {
         }
         should.not.exist(error,
           'Should not throw error when "credentialStatus.id" is absent');
+      });
+
+      it('should accept an array of "credentialStatus"', () => {
+        const credential = mockCredential();
+        credential.credentialStatus = [
+          {id: 'https://example.edu/status/1', type: 'urn:type1'},
+          {id: 'https://example.edu/status/2', type: 'urn:type2'}
+        ];
+        let error;
+        try {
+          vc._checkCredential({credential});
+        } catch(e) {
+          error = e;
+        }
+        should.not.exist(error,
+          'Should not throw error for an array of valid "credentialStatus"');
+      });
+
+      it('should validate every entry in a "credentialStatus" array', () => {
+        const credential = mockCredential();
+        // second entry has an invalid (non-URI) id
+        credential.credentialStatus = [
+          {id: 'https://example.edu/status/1', type: 'urn:type1'},
+          {id: 'not-a-url', type: 'urn:type2'}
+        ];
+        let error;
+        try {
+          vc._checkCredential({credential});
+        } catch(e) {
+          error = e;
+        }
+        should.exist(error,
+          'Should throw when any "credentialStatus" entry has an invalid id');
+        error.should.be.instanceof(TypeError);
+        error.message.should
+          .contain('"credentialStatus.id" must be a URI');
+      });
+
+      it('should reject a "credentialStatus" array entry with no type', () => {
+        const credential = mockCredential();
+        credential.credentialStatus = [
+          {id: 'https://example.edu/status/1', type: 'urn:type1'},
+          {id: 'https://example.edu/status/2'}
+        ];
+        let error;
+        try {
+          vc._checkCredential({credential});
+        } catch(e) {
+          error = e;
+        }
+        should.exist(error,
+          'Should throw when a "credentialStatus" entry is missing a type');
+        error.message.should
+          .contain('"credentialStatus" must include a type.');
       });
 
       it('should reject an evidence id that is not a URI', () => {

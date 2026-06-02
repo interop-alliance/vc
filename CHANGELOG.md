@@ -3,6 +3,13 @@
 ## Unreleased - TBD
 
 ### Added
+- Add `includeCredentials` option to `verify()`: when verifying a presentation,
+  each entry in `credentialResults` includes its source `credential`. Ported
+  from `@digitalbazaar/vc@7.3.0`, but **defaults to `true`** (rather than `false`
+  as upstream) to preserve this fork's existing behavior of always attaching the
+  credential; pass `includeCredentials: false` to omit them.
+- Add test coverage confirming `credentialStatus` may be an array (already
+  supported by the `_checkCredential` validation, which validates every entry).
 - Add `maxClockSkew` parameter (default `300` seconds) to `issue()`, `verify()`,
   `verifyCredential()`, and `createPresentation()`. Date-time checks
   (`expirationDate`/`issuanceDate` for VC 1.0, `validFrom`/`validUntil` for
