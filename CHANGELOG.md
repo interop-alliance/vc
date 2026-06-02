@@ -2,6 +2,14 @@
 
 ## Unreleased - TBD
 
+### Added
+- Add `maxClockSkew` parameter (default `300` seconds) to `issue()`, `verify()`,
+  `verifyCredential()`, and `createPresentation()`. Date-time checks
+  (`expirationDate`/`issuanceDate` for VC 1.0, `validFrom`/`validUntil` for
+  VC 2.0) now tolerate clock skew up to `maxClockSkew`, fixing spurious failures
+  in decentralized systems where clocks are not perfectly in sync. Ported from
+  `@digitalbazaar/vc@7.3.0`.
+
 ### Removed
 - Remove the legacy OBv3 BETA signature verification fallback
   (`_verifyOBv3LegacySignature`, `wrapWithLegacyLoader`, and
