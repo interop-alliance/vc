@@ -143,20 +143,112 @@ on this toolchain; same `src/` + `test/{node,browser}` layout).
      coercion in real `.ts` (half-fixing in JSDoc just moves the error into the
      body). Realized gate: typedefs deepened, real JSDoc errors fixed, residue
      categorized, **120/120 mocha + old lint clean**.
-- **B2 -- mechanical `.js -> .ts`, move `lib/ -> src/`.** Collapse JSDoc into
-  inline types, default-export object to named exports, satisfy `strict` +
-  `noUncheckedIndexedAccess`; add `src/declarations.d.ts` for untyped deps.
-  Gate: `tsc` compiles `src/ -> dist/`.
-- **B3 -- toolchain swap.** Template configs; rewrite `package.json` (pnpm
-  scripts, `exports`->`dist`); delete karma/old-eslint/package-lock; `pnpm
-  install`. Gate: `pnpm run build` + `pnpm run lint` clean.
-- **B4 -- Vitest migration (`test/node/`).** mocha+chai -> Vitest `.ts`; drop
-  Ed25519 2018, migrate to `@interop/ed25519-signature` (Multikey + 2020). Gate:
-  `pnpm run test-node` green + `tsc -p tsconfig.dev.json --noEmit` clean.
+- **B2 -- mechanical `.js -> .ts`, move `lib/ -> src/`. DONE.** Converted all
+  five modules to `src/*.ts`, collapsing JSDoc into inline types. Defined option
+  interfaces (`IssueCredentialOptions`, `VerifyCredentialOptions`,
+  `VerifyPresentationOptions`, etc. -- all fields optional, which is what makes
+  the `= {}` default valid: bucket 1 resolved). Used the jsigs shipped types
+  (`DocumentLoader`, `LinkedDataProof`/`LinkedDataSignature`, `ProofPurpose`,
+  `ProofValidateResult`) for the boundary params, and `IVerifiableCredential` /
+  `IVerifiablePresentation` / `ICredentialSubject` from data-integrity-core for
+  the data shapes (bucket 2 resolved; `error.log`/`result.log` typed via an
+  `ErrorWithLog` alias and `VerifyCredentialResult.log`). `compareTime` now
+  coerces with `Number()` (bucket 3). `src/declarations.d.ts` declares the three
+  untyped deps (`@interop/jsonld`, `credentials-context`,
+  `credentials-v2-context`); jsigs/data-integrity-core keep their shipped types.
+  Added template `tsconfig.json`; removed throwaway `tsconfig.checkjs.json`.
+  Two residual jsigs-type casts: `AuthenticationProofPurposeOptions` is typed as
+  requiring `term` (upstream quirk; the class sets it), cast at the two call
+  sites; jsigs `verify`/`sign` call args spread `...options` so are cast `as any`
+  at those boundaries. Gate: `tsc` compiles `src/ -> dist/` **0 errors**, full
+  `.d.ts` emitted, runtime ESM load + public API surface verified. (The mocha
+  suite is now red -- it imports the deleted `lib/`; rebuilt on Vitest in B4.)
+- **B3 -- toolchain swap. DONE.** Added template configs (`eslint.config.js`,
+  `prettier.config.js`, `tsconfig.dev.json`, `vite.config.ts`,
+  `playwright.config.ts`; template `.gitignore`/`.editorconfig`). Rewrote
+  `package.json`: renamed `@digitalcredentials/vc` -> `@interop/vc`,
+  `exports`->`dist` (`types`/`react-native`/`import`), pnpm template scripts,
+  `engines.node >= 24.0`, `packageManager pnpm@11.3.0`; devDeps swapped to the
+  toolchain set (eslint 10 + typescript-eslint + prettier, vitest 4, playwright,
+  vite 8, rimraf, `@types/node`); runtime `dependencies` trimmed to the 5 actually
+  imported by `src/` (`@interop/{jsonld,jsonld-signatures,data-integrity-core}`,
+  `credentials-context`, `@digitalcredentials/credentials-v2-context`) --
+  dropped `ed25519-signature-2018-context` (only ever a test dep, not imported in
+  `src/`). Deleted `karma.conf.cjs`, `.eslintrc.cjs`, `package-lock.json`. `pnpm
+  install` auto-created `pnpm-workspace.yaml` with a `minimumReleaseAgeExclude`
+  entry for `@interop/data-integrity-core@6.1.0` (loose mode). Lint scope: the
+  flat eslint config `globalIgnores` the legacy mocha `test/**/*.js` (dead until
+  the B4 Vitest rebuild), so `eslint src test` only sees the TS toolchain. Other
+  test-fixture/infra devDeps (ecdsa-*, ed25519-*, did-*, data-integrity-context,
+  uuid, klona, security-document-loader, `@interop/data-integrity-proof`) were
+  NOT carried over; B4 re-adds exactly what the rebuilt Vitest suite needs. Gate:
+  `pnpm run build` (tsc, 0 errors, full `.d.ts` emitted) + `pnpm run lint`
+  (0 problems) clean; `dist/index.js` runtime-loads with the full public API.
+- **B4 -- Vitest migration (`test/node/`). DONE.** Rebuilt the mocha+chai suite
+  as Vitest `.ts` under `test/node/`: `verify.test.ts` (port of
+  `10-verify.spec.js`), `dateRegex.test.ts`, plus fixtures `mock-data.ts`
+  (`versionedCredentials` + inline `@vocab` example contexts), `contexts.ts`
+  (the malformed negative-test contexts), `helpers.ts`, `documentLoader.ts`, and
+  `declarations.d.ts`. **120/120 passing** (same count as the old suite).
+  Dropped Ed25519 2018 entirely; the signing keys are now `@interop/ed25519-
+  verification-key` Multikey keys.
+  - **Suite choices (both the maintainer's wanted suites exercised):** VCs are
+    issued/verified with `Ed25519Signature2020` (from `@interop/ed25519-
+    signature`). **Presentations** are signed with the modern eddsa-rdfc-2022
+    `DataIntegrityProof` Multikey suite -- *not* 2020 -- because the VC 2.0
+    context defines proof terms like `challenge` only under the
+    `DataIntegrityProof` type scope, so a 2020-typed VP proof drops `challenge`
+    under JSON-LD safe mode (`jsonld.ValidationError`). Signed-VP verification
+    therefore passes a `[Ed25519Signature2020, DataIntegrityProof(eddsaRdfc2022)]`
+    suite array (inner VC proof + outer VP proof).
+  - **VeresOne dropped.** `did-veres-one`/`VeresOneDriver` is gone (maintainer
+    confirmed VeresOne is not needed). Issuers are now `did:key` DIDs, resolved
+    automatically by `@interop/security-document-loader`'s `securityLoader()`
+    (which also bundles the credentials v1/v2, DID, Ed25519-2020, Multikey, and
+    data-integrity contexts). `CredentialIssuancePurpose` requires the credential
+    `issuer` to equal the verification method's controller, so issue+verify tests
+    set `credential.issuer` to the generated `did:key`.
+  - **Document loader.** `documentLoader.ts` wraps `securityLoader()` (adding the
+    example + malformed contexts statically) behind a mutable `remoteDocuments`
+    map so individual tests can register ad-hoc docs -- used to register the
+    ECDSA-SD controller/key docs (the ecdsa-sd-2023 derive tests are retained,
+    still using `@digitalbazaar/ecdsa-multikey` + `ecdsa-sd-2023-cryptosuite` +
+    `@interop/data-integrity-proof`).
+  - **Test devDeps re-added** (B3 had trimmed all test fixtures): `@interop/{ed25519-
+    signature,ed25519-verification-key,did-method-key,security-document-loader,
+    data-integrity-proof}`, `@digitalbazaar/{ecdsa-multikey,ecdsa-sd-2023-
+    cryptosuite}`, `uuid`/`@types/uuid`. The two untyped `@digitalbazaar/ecdsa-*`
+    packages are declared in `test/node/declarations.d.ts`.
+  - **Test types.** Under `strict` + `noUncheckedIndexedAccess`, the freely-mutated
+    mock credentials and suites are typed `any` at the boundary (the
+    `@interop/ed25519-signature` `date: Date|null` vs lib `Date|undefined`
+    variance -- see "Upstream to-dos" below -- and dynamic `verify()` result
+    shapes), matching the pragmatic style of the `data-integrity-proof` reference
+    suite.
+  - **`pnpm install` (loose mode)** auto-added 8 `minimumReleaseAgeExclude` entries
+    to `pnpm-workspace.yaml` for the recently-published `@interop/*` deps
+    (including transitive `did-io`/`did-web-resolver`). Flag for the user per
+    global CLAUDE.md.
+  - Gate: `pnpm run test-node` green (120/120), `tsc -p tsconfig.dev.json
+    --noEmit` clean, `pnpm run lint` + `pnpm run build` clean.
 - **B5 -- Playwright smoke (`test/browser/`).** issue->verify roundtrip. Gate:
   `pnpm run test-browser` green.
 - **B6 -- cleanup + docs.** README, flip `CLAUDE.md` status bullets, CI,
   CHANGELOG. Gate: full `pnpm test` green.
+
+#### Upstream to-dos (other `@interop/*` repos)
+
+- **Widen `LinkedDataSignature.date` to `Date | null` in
+  `@interop/jsonld-signatures`.** Its `index.d.ts` types the suite `date` as
+  `Date | undefined`, but `@interop/data-integrity-proof`'s `DataIntegrityProof`
+  (and thus `Ed25519Signature2020` / the eddsa-rdfc-2022 suite) widens it to
+  `Date | null` -- passing `date: null` is the supported way to omit `created`
+  from a proof. Because `null` is not assignable to `Date | undefined`, every
+  `issue`/`verifyCredential`/`derive`/`signPresentation`/`verify` call that
+  receives a real suite fails to type-check, which is why the B4 test suite types
+  its suite holders as `any` (see `test/node/verify.test.ts` header comment).
+  It is a `.d.ts`-only mismatch (harmless at runtime). Once jsigs widens the
+  field, those `any`s can become the concrete suite classes.
 
 #### Phase B decisions (from maintainer)
 
