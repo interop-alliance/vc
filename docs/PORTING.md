@@ -112,6 +112,64 @@ Phase B test rebuild):
   `src/` layout); rebuild test infra (borrowing from `@digitalbazaar/vc`, on the
   `@interop` test-infra forks above); drop Ed25519 2018 during the rebuild.
 
+#### Phase B sub-phases (execute one at a time, stop at each gate)
+
+Reference implementation: `@interop/data-integrity-proof` (sibling fork already
+on this toolchain; same `src/` + `test/{node,browser}` layout).
+
+- **B1 -- JSDoc-deepen (stays JS + mocha, green). DONE.** Deepened the shallow
+  typedefs in `lib/index.js`: `VerifiableCredential`/`VerifiablePresentation` now
+  alias `@interop/data-integrity-core`'s `IVerifiableCredential`/
+  `IVerifiablePresentation` (added `@interop/data-integrity-core@^6.1.0` as a
+  type source -- currently referenced only via JSDoc `import(...)`, becomes an
+  `import type` in B2); added `LogEntry` and fleshed out
+  `VerifyCredentialResult`/`VerifyPresentationResult`. Fixed genuine JSDoc syntax
+  errors (`@typedef ErrorConstructor` -> `Error`; `@throws` splitting the
+  `options.*` param chain in `_verifyCredential`; malformed
+  `@returns {Promise<{VerifiablePresentation}>}`). Added throwaway
+  `tsconfig.checkjs.json` + `typescript` devDep for the check.
+
+  **Gate adjustment:** a literally-clean `tsc --checkJs` is NOT the right bar
+  pre-conversion. `@interop/jsonld-signatures` ships types, so `checkJs` type-checks
+  every `jsigs.*` call and (via TS's weak JS inference) flags the `= {}`
+  destructuring-default on every exported function. The ~34 residual diagnostics
+  are all in three buckets, each properly resolved in B2 (not by contorting JS):
+  1. `= {}` destructuring-default artifact -> define real *option interfaces*
+     (all-optional fields) in B2.
+  2. jsigs upstream-type interop (`Function` vs `DocumentLoader`,
+     `AuthenticationProofPurpose` needs `term`, `validate` override variance,
+     custom `error.log`/`result.log`) -> typed signatures/casts in B2.
+  3. `compareTime` typed `{number}` but called with `Date` -> use `.getTime()`
+     coercion in real `.ts` (half-fixing in JSDoc just moves the error into the
+     body). Realized gate: typedefs deepened, real JSDoc errors fixed, residue
+     categorized, **120/120 mocha + old lint clean**.
+- **B2 -- mechanical `.js -> .ts`, move `lib/ -> src/`.** Collapse JSDoc into
+  inline types, default-export object to named exports, satisfy `strict` +
+  `noUncheckedIndexedAccess`; add `src/declarations.d.ts` for untyped deps.
+  Gate: `tsc` compiles `src/ -> dist/`.
+- **B3 -- toolchain swap.** Template configs; rewrite `package.json` (pnpm
+  scripts, `exports`->`dist`); delete karma/old-eslint/package-lock; `pnpm
+  install`. Gate: `pnpm run build` + `pnpm run lint` clean.
+- **B4 -- Vitest migration (`test/node/`).** mocha+chai -> Vitest `.ts`; drop
+  Ed25519 2018, migrate to `@interop/ed25519-signature` (Multikey + 2020). Gate:
+  `pnpm run test-node` green + `tsc -p tsconfig.dev.json --noEmit` clean.
+- **B5 -- Playwright smoke (`test/browser/`).** issue->verify roundtrip. Gate:
+  `pnpm run test-browser` green.
+- **B6 -- cleanup + docs.** README, flip `CLAUDE.md` status bullets, CI,
+  CHANGELOG. Gate: full `pnpm test` green.
+
+#### Phase B decisions (from maintainer)
+
+- **Domain types:** import canonical types (`IVerifiableCredential`,
+  `ICredentialStatus`, `IProofDescription`, `ISigner`, ...) from
+  `@interop/data-integrity-core@^6.1.0` (add as a runtime dependency) rather than
+  hand-rolling local types.
+- **Package rename:** rename `name` `@digitalcredentials/vc` -> `@interop/vc` in
+  B3 (user publishes manually).
+- **Node target:** match the template -- `engines.node >= 24`, template devDep
+  versions verbatim.
+- **Cadence:** stop at each sub-phase gate for go-ahead.
+
 ## Lessons learned / non-obvious findings
 
 - **`credentialStatus` arrays already worked.** `_checkCredential` validates via
