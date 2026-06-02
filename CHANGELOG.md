@@ -1,5 +1,17 @@
 # @digitalcredentials/vc ChangeLog
 
+## Unreleased - TBD
+
+### Removed
+- Remove the legacy OBv3 BETA signature verification fallback
+  (`_verifyOBv3LegacySignature`, `wrapWithLegacyLoader`, and
+  `lib/legacyDocumentLoader.js`), along with the now-unused
+  `@digitalcredentials/open-badges-context` dependency. VCs using the
+  unversioned OBv3 BETA context
+  (`https://purl.imsglobal.org/spec/ob/v3p0/context.json`) are now verified via
+  the standard path. The removed behavior is preserved in
+  `docs/obv3-legacy-history.md`.
+
 ## 10.0.2 - 2025-11-19
 
 ### Changed
