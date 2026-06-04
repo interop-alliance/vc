@@ -8,7 +8,7 @@
  * @license BSD 3-Clause License
  * Copyright (c) 2017-2025 Digital Bazaar, Inc.
  * Copyright (c) 2022-2025 DCC (Digital Credentials Consortium).
- * Copyright (c) 2026 TypeScript conversion by Interop Alliance.
+ * Copyright (c) 2026 Digital Bazaar, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
