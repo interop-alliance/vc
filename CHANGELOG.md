@@ -1,5 +1,12 @@
 # @interop/vc ChangeLog
 
+## 11.0.2 - 2026-06-06
+
+### Added
+
+- Add default export to `package.json`.
+
+
 ## 11.0.1 - 2026-06-02
 
 ### Changed
