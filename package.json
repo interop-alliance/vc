@@ -1,6 +1,6 @@
 {
   "name": "@interop/vc",
-  "version": "11.0.3",
+  "version": "11.0.4",
   "description": "Verifiable Credentials JavaScript library.",
   "type": "module",
   "scripts": {
