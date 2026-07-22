@@ -531,7 +531,7 @@ pnpm test
 
 ## Contribute
 
-PRs accepted.
+PRs accepted. See [CONTRIBUTING.md](CONTRIBUTING.md) -- code style and contribution conventions.
 
 Note: If editing the Readme, please conform to the
 [standard-readme](https://github.com/RichardLitt/standard-readme) specification.
