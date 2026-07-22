@@ -1,6 +1,6 @@
 # @interop/vc ChangeLog
 
-## 11.0.6 - TBD
+## 11.0.6 - 2026-07-22
 
 ### Changed
 - Update to latest `@interop/` deps.
