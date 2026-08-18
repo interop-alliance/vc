@@ -1,6 +1,6 @@
 # @interop/vc ChangeLog
 
-## 11.0.7 - TBD
+## 11.0.7 - 2026-08-18
 
 ### Changed
 - Update to latest `@interop/data-integrity-core@8.7.1`.
