@@ -1,6 +1,6 @@
 # @interop/vc ChangeLog
 
-## 11.0.8 - TBD
+## 11.0.8 - 2026-09-05
 
 ### Changed
 - Update to latest key deps.
