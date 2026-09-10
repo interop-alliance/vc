@@ -1,5 +1,10 @@
 # @interop/vc ChangeLog
 
+## 11.0.9 - TBD
+
+### Changed
+- Update to latest ed25519 key dep (`didKeySigner()`).
+
 ## 11.0.8 - 2026-09-05
 
 ### Changed
