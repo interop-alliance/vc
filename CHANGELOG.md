@@ -1,5 +1,10 @@
 # @interop/vc ChangeLog
 
+## 11.0.11 - TBD
+
+### Fixed
+- Fix lockfile.
+
 ## 11.0.10 - 2026-09-25
 
 ### Changed
