@@ -1,5 +1,12 @@
 # @interop/vc ChangeLog
 
+## 11.0.12 - TBD
+
+### Changed
+- Update to `@interop/jsonld-signatures@11.8.7`; drop the
+  `AuthenticationProofPurposeOptions` casts its corrected types made
+  unnecessary.
+
 ## 11.0.11 - 2026-09-27
 
 ### Fixed

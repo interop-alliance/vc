@@ -38,11 +38,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 import jsigs from '@interop/jsonld-signatures'
-import type {
-  AuthenticationProofPurposeOptions,
-  LinkedDataProof,
-  ProofPurpose
-} from '@interop/jsonld-signatures'
+import type { LinkedDataProof, ProofPurpose } from '@interop/jsonld-signatures'
 import jsonld from '@interop/jsonld'
 import type {
   ICredentialSubject,
@@ -580,7 +576,7 @@ export async function signPresentation(
     new AuthenticationProofPurpose({
       domain,
       challenge: challenge as string
-    } as AuthenticationProofPurposeOptions)
+    })
 
   const documentLoader = options.documentLoader || defaultDocumentLoader
 
@@ -666,7 +662,7 @@ async function _verifyPresentation(
       controller,
       domain,
       challenge: challenge as string
-    } as AuthenticationProofPurposeOptions)
+    })
 
   const presentationResult = await jsigs.verify(
     presentation as object,
