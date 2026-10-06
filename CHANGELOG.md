@@ -1,6 +1,6 @@
 # @interop/vc ChangeLog
 
-## 11.0.12 - TBD
+## 11.0.12 - 2026-10-06
 
 ### Changed
 - Update to `@interop/jsonld-signatures@11.8.7`; drop the
