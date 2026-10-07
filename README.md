@@ -451,6 +451,16 @@ const result = await vc.verify({
 // {valid: true}
 ```
 
+To verify only the presentation's own proof, pass `verifyCredentials: false`.
+The embedded credentials are then left unverified and `credentialResults` is
+omitted. Use this when the caller verifies each embedded credential itself.
+
+```js
+const result = await vc.verify({
+  presentation, suite, documentLoader, challenge, verifyCredentials: false
+});
+```
+
 #### `challenge` parameter
 
 Verifiable Presentations are typically used for authentication purposes.

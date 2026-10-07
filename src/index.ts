@@ -162,6 +162,7 @@ export interface VerifyPresentationOptions {
   now?: string | Date
   maxClockSkew?: number
   includeCredentials?: boolean
+  verifyCredentials?: boolean
 }
 
 /** Options for {@link createPresentation}. */
@@ -322,6 +323,10 @@ export async function derive({
  * @param options.includeCredentials - Set to `true` to include each verified
  *   `credential` in its entry in `credentialResults`. Defaults to `true` to
  *   preserve backwards compatibility; set to `false` to omit them.
+ * @param options.verifyCredentials - Set to `false` to verify only the
+ *   presentation's own proof and leave the embedded credentials unverified
+ *   (`credentialResults` is then omitted). Defaults to `true`. Use this when
+ *   the caller verifies each embedded credential itself.
  *
  * @returns The verification result.
  */
@@ -607,7 +612,8 @@ async function _verifyPresentation(
   const {
     presentation,
     unsignedPresentation,
-    includeCredentials = true
+    includeCredentials = true,
+    verifyCredentials = true
   } = options
 
   _checkPresentation(presentation as Presentation)
@@ -620,7 +626,9 @@ async function _verifyPresentation(
   // if verifiableCredentials are present, verify them, individually
   let credentialResults: VerifyCredentialResult[] | undefined
   let verified = true
-  const credentials = jsonld.getValues(presentation, 'verifiableCredential')
+  const credentials = verifyCredentials
+    ? jsonld.getValues(presentation, 'verifiableCredential')
+    : []
   if (credentials.length > 0) {
     // verify every credential in `verifiableCredential`
     credentialResults = await Promise.all(

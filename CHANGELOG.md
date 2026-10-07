@@ -1,5 +1,12 @@
 # @interop/vc ChangeLog
 
+## 11.1.0 - TBD
+
+### Added
+- Add `verifyCredentials` option to `verify()`. Pass `false` to verify only
+  the presentation's own proof and leave the embedded credentials unverified
+  (`credentialResults` is omitted). Defaults to `true`.
+
 ## 11.0.12 - 2026-10-06
 
 ### Changed

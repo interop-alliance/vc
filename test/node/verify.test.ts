@@ -642,6 +642,65 @@ for (const [version, mockCredential] of versionedCredentials) {
           expect(credentialResult.credentialId).toBeDefined()
         }
       })
+      it('verifies only the presentation proof when verifyCredentials is false', async () => {
+        const challenge = uuid()
+        // A credential with `credentialStatus` cannot be verified without a
+        // `checkStatus` function, while the presentation proof over it still
+        // verifies.
+        const statusCredential = () => ({
+          ...mockCredential(),
+          credentialStatus: {
+            id: 'https://example.edu/status/24',
+            type: 'CredentialStatusList2017'
+          }
+        })
+
+        const { presentation, suite, documentLoader } =
+          await generatePresentation({
+            challenge,
+            mockCredential: statusCredential,
+            version
+          })
+
+        const withCredentials: any = await vc.verify({
+          challenge,
+          suite,
+          documentLoader,
+          presentation
+        })
+        expect(withCredentials.verified).toBe(false)
+        expect(withCredentials.credentialResults[0].verified).toBe(false)
+
+        const result: any = await vc.verify({
+          challenge,
+          suite,
+          documentLoader,
+          presentation,
+          verifyCredentials: false
+        })
+        expect(result.verified).toBe(true)
+        expect(result.credentialResults).toBeUndefined()
+        expect(result.presentationResult.verified).toBe(true)
+      })
+      it('still checks the presentation shape when verifyCredentials is false', async () => {
+        const challenge = uuid()
+
+        const { presentation, suite, documentLoader } =
+          await generatePresentation({ challenge, mockCredential, version })
+        presentation.type = ['NotAPresentation']
+
+        const result: any = await vc.verify({
+          challenge,
+          suite,
+          documentLoader,
+          presentation,
+          verifyCredentials: false
+        })
+        expect(result.verified).toBe(false)
+        expect(result.error.message).toBe(
+          '"type" must include "VerifiablePresentation".'
+        )
+      })
     })
 
     describe('test for multiple credentials', () => {
