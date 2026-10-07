@@ -1,6 +1,6 @@
 # @interop/vc ChangeLog
 
-## 11.1.0 - TBD
+## 11.1.0 - 2026-10-07
 
 ### Added
 - Add `verifyCredentials` option to `verify()`. Pass `false` to verify only
