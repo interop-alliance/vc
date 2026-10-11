@@ -1,5 +1,12 @@
 # @interop/vc ChangeLog
 
+## 11.1.1 - TBD
+
+### Fixed
+- Anchor `dateRegex` to the whole string and escape the fraction separator, so
+  a value that merely contains a dateTime (for example
+  `2019-03-26T14:00:00Zjunk`) no longer passes `assertDateString`.
+
 ## 11.1.0 - 2026-10-07
 
 ### Added

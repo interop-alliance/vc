@@ -67,5 +67,14 @@ describe('verifies XML Schema DateTime', () => {
     it('should not accept a time past midnight', () => {
       assertDateTime('2019-03-25T24:01:00Z', false)
     })
+    it('should not accept leading text', () => {
+      assertDateTime('issued 2019-03-26T14:00:00Z', false)
+    })
+    it('should not accept trailing text', () => {
+      assertDateTime('2019-03-26T14:00:00Zjunk', false)
+    })
+    it('should not accept a fraction without a dot', () => {
+      assertDateTime('2019-03-26T14:00:00x123Z', false)
+    })
   })
 })
