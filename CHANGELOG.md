@@ -1,6 +1,6 @@
 # @interop/vc ChangeLog
 
-## 11.1.1 - TBD
+## 11.1.1 - 2026-10-11
 
 ### Fixed
 - Anchor `dateRegex` to the whole string and escape the fraction separator, so
