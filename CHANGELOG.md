@@ -1,5 +1,10 @@
 # @interop/vc ChangeLog
 
+## 11.1.2 - TBD
+
+### Changed
+- Update to latest di core and jsigs.
+
 ## 11.1.1 - 2026-10-11
 
 ### Fixed
